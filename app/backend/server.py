@@ -104,3 +104,29 @@ class DatasetEntryCreate(BaseModel):
     job_id: str
     relevance_score: float
 
+# ============ Local File Storage Functions ============
+
+def save_file(file_id: str, filename: str, content: bytes) -> str:
+    """Save file to local storage"""
+    ext = filename.split(".")[-1].lower() if "." in filename else "bin"
+    file_path = UPLOAD_DIR / f"{file_id}.{ext}"
+    with open(file_path, "wb") as f:
+        f.write(content)
+    return str(file_path)
+
+def get_file(file_path: str) -> bytes:
+    """Get file from local storage"""
+    path = Path(file_path)
+    if not path.exists():
+        raise HTTPException(status_code=404, detail="File not found")
+    with open(path, "rb") as f:
+        return f.read()
+
+def delete_file(file_path: str) -> bool:
+    """Delete file from local storage"""
+    path = Path(file_path)
+    if path.exists():
+        path.unlink()
+        return True
+    return False
+
